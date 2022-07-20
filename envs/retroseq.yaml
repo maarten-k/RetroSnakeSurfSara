@@ -3,8 +3,12 @@ channels:
   - conda-forge
   - hcc
 dependencies:
-  - samtools=0.1.19
-  - retroseq
+  - samtools=1.15
+  - bcftools
+  - bedtools
+  - coreutils
+  - exonerate
+  - perl >=5.26.2,<5.26.3.0a0
   - python=3.7
   - biopython
   - perl-text-soundex

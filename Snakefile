@@ -1,22 +1,28 @@
 configfile: "config.yaml"
 
-SAMPLES = ["sample"]
+
+SAMPLES = ["LP6005681-DNA_D07.final-gatk"]
 outPath = config["outPath"]
 bamPath = config["bamPath"]
 cramPath = config["cramPath"]
 
 
+localrules:
+    install_modified_retroseq,
+
+
 rule all:
-   input:
+    input:
         expand(outPath + "filter/{sample}.bed", sample=SAMPLES),
-        expand(outPath + "confirmed/{sample}.retroseqHitsConfirmed.bed",sample=SAMPLES)
-         
+        expand(outPath + "confirmed/{sample}.retroseqHitsConfirmed.bed", sample=SAMPLES),
+
+
 rule CramToBam:
     input:
-        cram_file=cramPath + "{sample}.cram"
+        cram_file=cramPath + "{sample}.cram",
     output:
         bamPath + "{sample}.bam",
-        bamPath + "{sample}.bam.bai"
+        bamPath + "{sample}.bam.bai",
     benchmark:
         "benchmarks/{sample}.CramToBam.benchmark.tsv"
     conda:
@@ -30,73 +36,93 @@ rule CramToBam:
         samtools index -@ {threads} {output[0]}
         """
 
+
+rule install_modified_retroseq:
+    output:
+        "resources/RetroSeq/bin/retroseq.pl",
+    threads: 1
+    shell:
+        """
+        mkdir -p resources/RetroSeq/
+        cd resources/RetroSeq/
+        wget https://github.com/maarten-k/RetroSeq/archive/refs/heads/master.zip
+        unzip master.zip
+        rm master.zip
+        mv RetroSeq-master/* .
+        rmdir RetroSeq-master
+        """
+
+
 rule retroseqDiscover:
     input:
-        bamPath + "{sample}.bam",
-        bamPath + "{sample}.bam.bai"
+        cram=cramPath + "{sample}.cram",
+        index=cramPath + "{sample}.cram.crai",
+        retroseq="resources/RetroSeq/bin/retroseq.pl",
     output:
-        outPath + "discover/{sample}.bed"
+        outPath + "discover/{sample}.bed",
     threads: 8
     log:
-        "logs/discover/{sample}.log"
-    
+        "logs/discover/{sample}.log",
     params:
-        identity=80
+        identity=80,
     benchmark:
-       #repeat("benchmarks/{sample}.retroseqDiscover.benchmark.txt",3)
-       "benchmarks/{sample}.retroseqDiscover.benchmark.txt"
+        #repeat("benchmarks/{sample}.retroseqDiscover.benchmark.txt",3)
+        "benchmarks/{sample}.retroseqDiscover.benchmark.txt"
     conda:
-       "envs/retroseq.yaml"
+        "envs/retroseq.yaml"
     shell:
-        "retroseq.pl -discover -bam {input[0]} -output {output} -eref {config[HERVK_eref]} -id {params.identity}"
- 
+        "{input.retroseq} -discover -bam {input.cram} -output {output} -eref {config[HERVK_eref]} -id {params.identity}"
+
+
 rule retroseqCall:
     input:
-        bam=bamPath + "{sample}.bam",
-        bai=bamPath + "{sample}.bam.bai",
-        discover=outPath + "discover/{sample}.bed"
+        bam=cramPath + "{sample}.cram",
+        bai=cramPath + "{sample}.cram.crai",
+        discover=outPath + "discover/{sample}.bed",
+        retroseq="resources/RetroSeq/bin/retroseq.pl",
     output:
-        outPath + "call/{sample}.vcf"
+        outPath + "call/{sample}.vcf",
     threads: 8
     benchmark:
-       "benchmarks/{sample}.retroCall.benchmark.txt"
+        "benchmarks/{sample}.retroCall.benchmark.txt"
     conda:
-       "envs/retroseq.yaml"
+        "envs/retroseq.yaml"
     log:
-        "logs/call/{sample}.log"
+        "logs/call/{sample}.log",
     shell:
-        "retroseq.pl -call -bam {input.bam} -input {input.discover} -ref {config[refHg19]} -output {output}"
+        "{input.retroseq} -call -bam {input.bam} -input {input.discover} -ref {config[refHg19]} -output {output}"
+
 
 rule filterCalls:
-   input:
-      outPath + "call/{sample}.vcf"
-   output:
-      outPath + "filter/{sample}.pos",
-      outPath + "filter/{sample}.bed"
-   log:
-        "logs/filter/{sample}.log"
-   benchmark:
-       "benchmarks/{sample}.filterCalls.benchmark.txt"
-   shell:
-       "python {config[pythonScripts]}/filterHighQualRetroseqForDownstream.py  {input} {output}"
+    input:
+        outPath + "call/{sample}.vcf",
+    output:
+        outPath + "filter/{sample}.pos",
+        outPath + "filter/{sample}.bed",
+    log:
+        "logs/filter/{sample}.log",
+    benchmark:
+        "benchmarks/{sample}.filterCalls.benchmark.txt"
+    shell:
+        "python {config[pythonScripts]}/filterHighQualRetroseqForDownstream.py  {input} {output}"
 
 
 rule verify:
     input:
-      outPath + "filter/{sample}.pos",
-      bamPath + "{sample}.bam",
-      bamPath + "{sample}.bam.bai"
+        outPath + "filter/{sample}.pos",
+        cramPath + "{sample}.cram",
+        cramPath + "{sample}.cram.crai",
     output:
-      outPath + "confirmed/{sample}.retroseqHitsConfirmed.bed"
+        outPath + "confirmed/{sample}.retroseqHitsConfirmed.bed",
     benchmark:
-      "benchmarks/{sample}.verify.tsv"
+        "benchmarks/{sample}.verify.tsv"
     params:
-        verificationLevel="low"
+        verificationLevel="low",
     conda:
-       "envs/verification.yaml"
+        "envs/verification.yaml"
     log:
-        "logs/call/{sample}.log"
+        "logs/call/{sample}.log",
     shell:
-      """
-      python {config[pythonScripts]}/assembleAndRepeatMasker.py {input[0]} {config[bamPath]}{wildcards.sample}.bam {config[outPath]} {config[RepeatMaskerPath]} {config[pythonScripts]} {config[element]} {params.verificationLevel} {output} 
-      """ 
+        """
+        python {config[pythonScripts]}/assembleAndRepeatMasker.py {input[0]} {config[bamPath]}{wildcards.sample}.bam {config[outPath]} {config[RepeatMaskerPath]} {config[pythonScripts]} {config[element]} {params.verificationLevel} {output} 
+        """

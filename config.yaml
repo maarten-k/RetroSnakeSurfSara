@@ -1,13 +1,13 @@
 #config.yaml
 
 #absolute or relative
-bamPath: /PATH_TO_YOUR_OWN_BAM_REPOSITORY/
-cramPath: /PATH_TO_YOUR_OWN_CRAM_REPOSITORY/
-outPath: /DIRECTORY_FOR_RESULTS/
+bamPath: /home/projectmine-mkooyman/retroseq/RetroSnakeSurfSara/bam/
+cramPath: /home/projectmine-mkooyman/realignment/
+outPath: results/
 HERVK_eref: resources/hervk_eref.tab
-refHg19: /PATH_TO_WHERE_YOU_DOWNLOADED_REFERENCE_GENOME/hg19.fa
+refHg19: /home/projectmine-mkooyman/realignment/ref/hs38DH.fa
 pythonScripts: pythonScripts
-RepeatMaskerPath: /PATH_OF_REPEATMASKER_INSTALLATION/RepeatMasker/
-genomeBuildGR: GRCh37
-genomeBuildHg: hg19
+RepeatMaskerPath: /home/projectmine-mkooyman/miniconda3/envs/repeatmasker/share/RepeatMasker/
+genomeBuildGR: GRCh38
+genomeBuildHg: hg38
 element: LTR5_Hs
