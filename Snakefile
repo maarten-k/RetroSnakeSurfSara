@@ -124,5 +124,5 @@ rule verify:
         "logs/call/{sample}.log",
     shell:
         """
-        python {config[pythonScripts]}/assembleAndRepeatMasker.py {input[0]} {config[bamPath]}{wildcards.sample}.bam {config[outPath]} {config[RepeatMaskerPath]} {config[pythonScripts]} {config[element]} {params.verificationLevel} {output} 
+        python {config[pythonScripts]}/assembleAndRepeatMasker.py {input[0]} {config[cramPath]}{wildcards.sample}.cram {config[outPath]} {config[RepeatMaskerPath]} {config[pythonScripts]} {config[element]} {params.verificationLevel} {output} 
         """
