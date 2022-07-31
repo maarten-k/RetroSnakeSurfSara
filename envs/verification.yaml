@@ -9,3 +9,4 @@ dependencies:
   - perl-text-soundex
   - h5py
   - cap3
+  - repeatmasker=4.1.2
