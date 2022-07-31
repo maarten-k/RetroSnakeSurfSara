@@ -1,10 +1,13 @@
 configfile: "config.yaml"
 
 
-SAMPLES = ["LP6005681-DNA_D07.final-gatk"]
+SAMPLES = ["samplecram"]
 outPath = config["outPath"]
 bamPath = config["bamPath"]
 cramPath = config["cramPath"]
+
+
+containerized: "/home/maartenk/temp/RetroSnakeSurfSara/sif/sif/retroseq.sif"
 
 
 localrules:
@@ -15,26 +18,6 @@ rule all:
     input:
         expand(outPath + "filter/{sample}.bed", sample=SAMPLES),
         expand(outPath + "confirmed/{sample}.retroseqHitsConfirmed.bed", sample=SAMPLES),
-
-
-rule CramToBam:
-    input:
-        cram_file=cramPath + "{sample}.cram",
-    output:
-        bamPath + "{sample}.bam",
-        bamPath + "{sample}.bam.bai",
-    benchmark:
-        "benchmarks/{sample}.CramToBam.benchmark.tsv"
-    conda:
-        "envs/sam_only.yaml"
-    threads: 4
-    resources:
-        mem_mb=16000,
-    shell:
-        """
-        samtools view -b -h -@ {threads} -T {config[refHg19]} -o {output[0]} {input.cram_file}
-        samtools index -@ {threads} {output[0]}
-        """
 
 
 rule install_modified_retroseq:
@@ -71,7 +54,7 @@ rule retroseqDiscover:
     conda:
         "envs/retroseq.yaml"
     shell:
-        "{input.retroseq} -discover -bam {input.cram} -output {output} -eref {config[HERVK_eref]} -id {params.identity}"
+        "perl {input.retroseq} -discover -bam {input.cram} -output {output} -eref {config[HERVK_eref]} -id {params.identity}"
 
 
 rule retroseqCall:
@@ -101,6 +84,8 @@ rule filterCalls:
         outPath + "filter/{sample}.bed",
     log:
         "logs/filter/{sample}.log",
+    conda:
+        "envs/verification.yaml"
     benchmark:
         "benchmarks/{sample}.filterCalls.benchmark.txt"
     shell:
@@ -124,5 +109,5 @@ rule verify:
         "logs/call/{sample}.log",
     shell:
         """
-        python {config[pythonScripts]}/assembleAndRepeatMasker.py {input[0]} {config[cramPath]}{wildcards.sample}.cram {config[outPath]} {config[RepeatMaskerPath]} {config[pythonScripts]} {config[element]} {params.verificationLevel} {output} 
+        python {config[pythonScripts]}/assembleAndRepeatMasker.py {input[0]} {config[cramPath]}{wildcards.sample}.cram {config[outPath]} $CONDA_PREFIX/bin/ {config[pythonScripts]} {config[element]} {params.verificationLevel} {output} 
         """
