@@ -2,12 +2,11 @@
 
 #absolute or relative
 bamPath: /home/projectmine-mkooyman/retroseq/RetroSnakeSurfSara/bam/
-cramPath: /home/projectmine-mkooyman/realignment/
+cramPath: /home/maartenk/temp/RetroSnakeSurfSara/
 outPath: results/
 HERVK_eref: resources/hervk_eref.tab
-refHg19: /home/projectmine-mkooyman/realignment/ref/hs38DH.fa
+refHg19: /cvmfs/softdrive.nl/projectmine_sw/resources/Build37/hg19/ucsc.hg19.fasta
 pythonScripts: pythonScripts
-RepeatMaskerPath: /home/projectmine-mkooyman/miniconda3/envs/repeatmasker/share/RepeatMasker/
-genomeBuildGR: GRCh38
-genomeBuildHg: hg38
+genomeBuildGR: GRCh37
+genomeBuildHg: hg37
 element: LTR5_Hs
