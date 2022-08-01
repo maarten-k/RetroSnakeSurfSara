@@ -1,12 +1,12 @@
 #config.yaml
 
 #absolute or relative
-bamPath: /home/projectmine-mkooyman/retroseq/RetroSnakeSurfSara/bam/
-cramPath: /home/maartenk/temp/RetroSnakeSurfSara/
+cramPath: /home/projectmine-mkooyman/STEAK/
 outPath: results/
 HERVK_eref: resources/hervk_eref.tab
-refHg19: /cvmfs/softdrive.nl/projectmine_sw/resources/Build37/hg19/ucsc.hg19.fasta
+refHg19: hg38_retroseq/hg38.fa
 pythonScripts: pythonScripts
-genomeBuildGR: GRCh37
-genomeBuildHg: hg37
+genomeBuildGR: GRCh38
+genomeBuildHg: hg38
 element: LTR5_Hs
+containerized_path: retroseq.sif
