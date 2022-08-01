@@ -3,11 +3,10 @@ configfile: "config.yaml"
 
 SAMPLES = ["samplecram"]
 outPath = config["outPath"]
-bamPath = config["bamPath"]
 cramPath = config["cramPath"]
 
 
-containerized: "/home/maartenk/temp/RetroSnakeSurfSara/sif/sif/retroseq.sif"
+containerized: config["containerized_path"]
 
 
 localrules:
@@ -24,6 +23,7 @@ rule install_modified_retroseq:
     output:
         "resources/RetroSeq/bin/retroseq.pl",
     threads: 1
+    container: None
     shell:
         """
         mkdir -p resources/RetroSeq/
