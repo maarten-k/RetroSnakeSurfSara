@@ -20,6 +20,7 @@ localrules:
 rule all:
     input:
         expand(outPath + "filter/{sample}.bed", sample=SAMPLES),
+        expand(outPath + "marked/{sample}.novelHitsFV.bed", sample=SAMPLES),
         expand(outPath + "confirmed/{sample}.retroseqHitsConfirmed.bed", sample=SAMPLES),
 
 
@@ -159,4 +160,28 @@ rule verify:
     shell:
         """
         python {config[pythonScripts]}/assembleAndRepeatMasker.py {input[0]} {config[cramPath]}{wildcards.sample}.cram {config[outPath]} $CONDA_PREFIX/bin/ {config[pythonScripts]} {config[element]} {params.verificationLevel} {output} 
+        """
+
+
+rule markAll:
+    input:
+        outPath + "filter/{sample}.bed",
+        outPath + "confirmed/{sample}.retroseqHitsConfirmed.bed",
+    output:
+        outPath + "marked/{sample}.knownHitsF.bed",
+        outPath + "marked/{sample}.novelHitsF.bed",
+        outPath + "marked/{sample}.knownHitsFV.bed",
+        outPath + "marked/{sample}.novelHitsFV.bed",
+    conda:
+        "envs/retroseq.yaml"
+    shell:
+        """
+        bedtools window -w 500 -c -a {config[knownNR]} -b  {input[0]}  > {output[0]}
+        bedtools sort -i  {input[0]} >  {config[outPath]}marked/{wildcards.sample}.sorted.bed
+        bedtools window -w 500 -v -a {config[outPath]}marked/{wildcards.sample}.sorted.bed -b {config[knownNR]} > {output[1]} 
+        rm {config[outPath]}marked/{wildcards.sample}.sorted.bed
+        bedtools window -w 500 -c -a {config[knownNR]} -b  {input[1]} > {output[2]}
+        bedtools sort -i  {input[1]} >  {config[outPath]}marked/{wildcards.sample}.sorted.bed
+        bedtools window -w 500 -v -a {config[outPath]}marked/{wildcards.sample}.sorted.bed -b {config[knownNR]} > {output[3]} 
+        rm {config[outPath]}marked/{wildcards.sample}.sorted.bed
         """
