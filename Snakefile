@@ -1,7 +1,11 @@
 configfile: "config.yaml"
 
 
-SAMPLES = ["samplecram"]
+SAMPLES = [
+    "LP6008462-DNA_A10.final-gatk",
+    "LP6008462-DNA_C09.final-gatk",
+    "LP6008462-DNA_D03.final-gatk",
+]
 outPath = config["outPath"]
 cramPath = config["cramPath"]
 
@@ -23,7 +27,8 @@ rule install_modified_retroseq:
     output:
         "resources/RetroSeq/bin/retroseq.pl",
     threads: 1
-    container: None
+    container:
+        None
     shell:
         """
         mkdir -p resources/RetroSeq/
@@ -43,7 +48,7 @@ rule retroseqDiscover:
         retroseq="resources/RetroSeq/bin/retroseq.pl",
     output:
         outPath + "discover/{sample}.bed",
-    threads: 8
+    threads: 1
     log:
         "logs/discover/{sample}.log",
     params:
@@ -64,16 +69,60 @@ rule retroseqCall:
         discover=outPath + "discover/{sample}.bed",
         retroseq="resources/RetroSeq/bin/retroseq.pl",
     output:
-        outPath + "call/{sample}.vcf",
-    threads: 8
+        temp(outPath + "call/{sample}_{chr}.vcf"),
+    threads: 1
     benchmark:
-        "benchmarks/{sample}.retroCall.benchmark.txt"
+        "benchmarks/{sample}_{chr}.retroCall.benchmark.txt"
     conda:
         "envs/retroseq.yaml"
     log:
-        "logs/call/{sample}.log",
+        "logs/call/{sample}_{chr}.log",
     shell:
-        "{input.retroseq} -call -bam {input.bam} -input {input.discover} -ref {config[refHg19]} -output {output}"
+        "{input.retroseq} -call -region {wildcards.chr} -bam {input.bam} -input {input.discover} -ref {config[refHg19]} -output {output}"
+
+
+rule MergeCalls:
+    input:
+        vcf=expand(
+            outPath + "call/{{sample}}_{chr}.vcf",
+            chr=[
+                "chr1",
+                "chr2",
+                "chr3",
+                "chr4",
+                "chr5",
+                "chr6",
+                "chr7",
+                "chr8",
+                "chr9",
+                "chr10",
+                "chr11",
+                "chr12",
+                "chr13",
+                "chr14",
+                "chr15",
+                "chr16",
+                "chr17",
+                "chr18",
+                "chr19",
+                "chr20",
+                "chr21",
+                "chr22",
+                "chrY",
+                "chrX",
+                "chrM",
+            ],
+        ),
+    output:
+        outPath + "call/{sample}.vcf",
+    conda:
+        "envs/retroseq.yaml"
+    threads: 1
+    shell:
+        """
+        grep "^#" {input.vcf[0]} >{output}
+        grep -hv "^#" {input.vcf}>>{output}
+        """
 
 
 rule filterCalls:
