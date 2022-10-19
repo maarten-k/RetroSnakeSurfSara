@@ -1,10 +1,7 @@
 configfile: "config.yaml"
 
 
-SAMPLES = [
-    "LP6008462-DNA_A10.final-gatk",
-    "LP6008462-DNA_C09.final-gatk",
-    "LP6008462-DNA_D03.final-gatk",
+SAMPLES = [config["sample"]
 ]
 outPath = config["outPath"]
 cramPath = config["cramPath"]

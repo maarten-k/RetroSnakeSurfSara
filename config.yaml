@@ -1,7 +1,7 @@
 #config.yaml
 
 #absolute or relative
-cramPath: /home/projectmine-mkooyman/reposeq_container/RetroSnakeSurfSara/ 
+cramPath: /path2cram
 outPath: results/
 HERVK_eref: resources/hervk_eref.tab
 refHg19: hg38_retroseq/hg38.fa
@@ -9,5 +9,6 @@ pythonScripts: pythonScripts
 genomeBuildGR: GRCh38
 genomeBuildHg: hg38
 element: LTR5_Hs
-containerized_path: retroseq.sif
+containerized_path: ../retroseq.sif
 knownNR: resources/list_of_known_integration_sitesNRHg38.bed
+sample: sample
