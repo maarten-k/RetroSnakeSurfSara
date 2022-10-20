@@ -4,7 +4,7 @@
 cramPath: /path2cram
 outPath: results/
 HERVK_eref: resources/hervk_eref.tab
-refHg19: hg38_retroseq/hg38.fa
+refHg19: /cvmfs/softdrive.nl/kooyman/RetroSnake/hg38.fa.gz
 pythonScripts: pythonScripts
 genomeBuildGR: GRCh38
 genomeBuildHg: hg38
