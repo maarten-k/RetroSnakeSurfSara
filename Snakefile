@@ -44,6 +44,7 @@ rule retroseqDiscover:
         cram=cramPath + "{sample}.cram",
         index=cramPath + "{sample}.cram.crai",
         retroseq="resources/RetroSeq/bin/retroseq.pl",
+        eref=config["HERVK_eref"]},
     output:
         outPath + "discover/{sample}.bed",
     threads: 1
@@ -57,7 +58,7 @@ rule retroseqDiscover:
     conda:
         "envs/retroseq.yaml"
     shell:
-        "perl {input.retroseq} -discover -bam {input.cram} -output {output} -eref {config[HERVK_eref]} -id {params.identity} > {log}"
+        "perl {input.retroseq} -discover -bam {input.cram} -output {output} -eref {input.eref} -id {params.identity} > {log}"
 
 
 rule retroseqCall:
@@ -66,6 +67,7 @@ rule retroseqCall:
         bai=cramPath + "{sample}.cram.crai",
         discover=outPath + "discover/{sample}.bed",
         retroseq="resources/RetroSeq/bin/retroseq.pl",
+        ref=config["refHg19"],
     output:
         temp(outPath + "call/{sample}_{chr}.vcf"),
     threads: 1
@@ -76,7 +78,7 @@ rule retroseqCall:
     log:
         "logs/call/{sample}_{chr}.log",
     shell:
-        "{input.retroseq} -call -region {wildcards.chr} -bam {input.bam} -input {input.discover} -ref {config[refHg19]} -output {output} > {log}"
+        "{input.retroseq} -call -region {wildcards.chr} -bam {input.bam} -input {input.discover} -ref {input.ref} -output {output} > {log}"
 
 
 rule MergeCalls:
