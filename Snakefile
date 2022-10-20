@@ -44,7 +44,7 @@ rule retroseqDiscover:
         cram=cramPath + "{sample}.cram",
         index=cramPath + "{sample}.cram.crai",
         retroseq="resources/RetroSeq/bin/retroseq.pl",
-        eref=config["HERVK_eref"]},
+        eref=config["HERVK_eref"],
     output:
         outPath + "discover/{sample}.bed",
     threads: 1
