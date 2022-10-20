@@ -57,7 +57,7 @@ rule retroseqDiscover:
     conda:
         "envs/retroseq.yaml"
     shell:
-        "perl {input.retroseq} -discover -bam {input.cram} -output {output} -eref {config[HERVK_eref]} -id {params.identity}"
+        "perl {input.retroseq} -discover -bam {input.cram} -output {output} -eref {config[HERVK_eref]} -id {params.identity} > {log}"
 
 
 rule retroseqCall:
@@ -76,7 +76,7 @@ rule retroseqCall:
     log:
         "logs/call/{sample}_{chr}.log",
     shell:
-        "{input.retroseq} -call -region {wildcards.chr} -bam {input.bam} -input {input.discover} -ref {config[refHg19]} -output {output}"
+        "{input.retroseq} -call -region {wildcards.chr} -bam {input.bam} -input {input.discover} -ref {config[refHg19]} -output {output} > {log}"
 
 
 rule MergeCalls:
